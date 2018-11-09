@@ -860,6 +860,12 @@ module Searchkick
         {bool: {must_not: {exists: {field: field}}}}
       elsif value.is_a?(Regexp)
         {regexp: {field => {value: value.source}}}
+      elsif value.is_a?(Hash)
+        out = []
+        value[:_or]&.each do |val|
+          out << val.map { |e| { term: { field => e } } }
+        end
+        { bool: { should: out } }
       else
         {term: {field => value}}
       end
